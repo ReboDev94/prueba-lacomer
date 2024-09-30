@@ -1,0 +1,11 @@
+services:
+  mysql:
+    container_name: 'guide-mysql'
+    image: 'mysql:latest'
+    environment:
+      - 'MYSQL_DATABASE=prueba'
+      - 'MYSQL_PASSWORD=prueba'
+      - 'MYSQL_ROOT_PASSWORD=prueba'
+      - 'MYSQL_USER=prueba'
+    ports:
+      - '3306:3306'
