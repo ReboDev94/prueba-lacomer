@@ -6,6 +6,7 @@ import com.rebodev.prueba.model.entity.copomex.Address;
 import com.rebodev.prueba.model.payload.MessageResponse;
 import com.rebodev.prueba.service.IAddressService;
 import com.rebodev.prueba.service.IUserService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
@@ -27,7 +28,7 @@ public class UserController {
 
     @PostMapping("user")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<?> create(@RequestBody UserDto userDto) {
+    public ResponseEntity<?> create(@Valid @RequestBody UserDto userDto) {
         Address address = addressService.getAddressByCp(userDto.getCp());
         User userSave = null;
         try {
