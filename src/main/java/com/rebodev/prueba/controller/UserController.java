@@ -6,6 +6,10 @@ import com.rebodev.prueba.model.entity.copomex.Address;
 import com.rebodev.prueba.model.payload.MessageResponse;
 import com.rebodev.prueba.service.IAddressService;
 import com.rebodev.prueba.service.IUserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -26,6 +30,30 @@ public class UserController {
     @Autowired
     private IAddressService addressService;
 
+
+    @Operation(
+            summary = "Guardar datos de un usuario",
+            description = "Realiza el guardado de los datos de un usuario",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "201",
+                            description = "Guardado exitoso",
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDto.class))
+                    ),
+                    @ApiResponse(
+                            responseCode = "400",
+                            description = "No pasa la validacion de los campos",
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDto.class))
+
+                    ),
+                    @ApiResponse(
+                            responseCode = "500",
+                            description = "Ocurrio un error al guardar los datos",
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))
+
+                    )
+            }
+    )
     @PostMapping("user")
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<?> create(@Valid @RequestBody UserDto userDto) {
@@ -38,18 +66,7 @@ public class UserController {
             userDto.setState(address.getEstado());
             userDto.setSettementType(address.getTipo_asentamiento());
             userSave = userService.save(userDto);
-            userDto = UserDto.builder()
-                    .id(userSave.getId())
-                    .name(userSave.getName())
-                    .lastFirstName(userSave.getLastFirstName())
-                    .lastSecondName(userSave.getLastSecondName())
-                    .email(userSave.getEmail())
-                    .city(userSave.getCity())
-                    .cp(userSave.getCp())
-                    .municipality(userSave.getMunicipality())
-                    .settementType(userSave.getSettementType())
-                    .state(userSave.getState())
-                    .build();
+            userDto = this.mapUserToDto(userSave);
 
             return new ResponseEntity<>(
                     MessageResponse.builder()
@@ -68,6 +85,36 @@ public class UserController {
 
     }
 
+
+    @Operation(
+            summary = "Actualizar los datos de un usuario",
+            description = "Realiza la actualización de los datos de un usuario",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "201",
+                            description = "Actualización exitosa",
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDto.class))
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "El registro no existe",
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))
+
+                    ),
+                    @ApiResponse(
+                            responseCode = "400",
+                            description = "No pasa la validacion de los campos",
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDto.class))
+
+                    ),
+                    @ApiResponse(
+                            responseCode = "500",
+                            description = "Ocurrio un error al guardar los datos",
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))
+
+                    )
+            }
+    )
     @PutMapping("user/{id}")
     @ResponseStatus(HttpStatus.CREATED)
     public ResponseEntity<?> update(@Valid @RequestBody UserDto userDto, @PathVariable Integer id) {
@@ -106,7 +153,7 @@ public class UserController {
                         MessageResponse.builder()
                                 .message("El registro no existe")
                                 .data(null)
-                                .build(), HttpStatus.INTERNAL_SERVER_ERROR
+                                .build(), HttpStatus.NOT_FOUND
                 );
             }
 
@@ -120,6 +167,28 @@ public class UserController {
         }
     }
 
+    @Operation(
+            summary = "Eliminar datos de un usuario",
+            description = "Realiza la eliminación de los datos de un usuario por id",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "204",
+                            description = "Eliminación exitosa"
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "No existe el registro para eliminar",
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))
+
+                    ),
+                    @ApiResponse(
+                            responseCode = "500",
+                            description = "Ocurrio al eliminar al usuario",
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))
+
+                    )
+            }
+    )
     @DeleteMapping("user/{id}")
     public ResponseEntity<?> delete(@PathVariable Integer id) {
         try {
@@ -131,10 +200,33 @@ public class UserController {
                     MessageResponse.builder()
                             .message("No se encontró ninguna coincidencia para el registro que intenta eliminar")
                             .data(null)
-                            .build(), HttpStatus.INTERNAL_SERVER_ERROR);
+                            .build(), HttpStatus.NOT_FOUND);
         }
     }
 
+    @Operation(
+            summary = "Obtener usuario",
+            description = "Obtener los datos de un usuario por id",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Retorna los datos correctamente",
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = UserDto.class))
+                    ),
+                    @ApiResponse(
+                            responseCode = "404",
+                            description = "No se encontró ninguna coincidencia",
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))
+
+                    ),
+                    @ApiResponse(
+                            responseCode = "500",
+                            description = "Ocurrio un error al obtener los datos del usuario",
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))
+
+                    )
+            }
+    )
     @GetMapping("user/{id}")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<?> showById(@PathVariable Integer id) {
@@ -147,7 +239,63 @@ public class UserController {
                             .build(), HttpStatus.NOT_FOUND);
         }
 
-        UserDto userDto = UserDto.builder()
+        UserDto userDto = this.mapUserToDto(user);
+
+        return new ResponseEntity<>(
+                MessageResponse.builder()
+                        .message("")
+                        .data(userDto)
+                        .build(), HttpStatus.OK);
+    }
+
+    @Operation(
+            summary = "Obtener todos los usuarios",
+            description = "Obtener los datos de todos los usuarios",
+            responses = {
+                    @ApiResponse(
+                            responseCode = "200",
+                            description = "Retorna los datos correctamente"
+                    ),
+                    @ApiResponse(
+                            responseCode = "500",
+                            description = "Ocurrio un error al obtener los datos de los usuarios",
+                            content = @Content(mediaType = "application/json", schema = @Schema(implementation = MessageResponse.class))
+
+                    )
+            }
+    )
+    @GetMapping("user")
+    public ResponseEntity<?> getAllUsers(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int size,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "true") boolean ascending
+    ) {
+
+        try {
+            Sort sort = ascending ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+            Pageable pageable = PageRequest.of(page, size, sort);
+            Page<User> paginateUsers = userService.findAll(pageable);
+            Page<UserDto> users = paginateUsers.map(this::mapUserToDto);
+
+            return new ResponseEntity<>(
+                    MessageResponse.builder()
+                            .message("")
+                            .data(users)
+                            .build(), HttpStatus.OK);
+
+        } catch (Exception e) {
+            return new ResponseEntity<>(
+                    MessageResponse.builder()
+                            .message("Ocurrio un error al obtener los datos de los usuarios")
+                            .data(null)
+                            .build(), HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+    }
+
+    private UserDto mapUserToDto(User user) {
+        return UserDto.builder()
                 .id(user.getId())
                 .name(user.getName())
                 .lastFirstName(user.getLastFirstName())
@@ -159,23 +307,5 @@ public class UserController {
                 .settementType(user.getSettementType())
                 .state(user.getState())
                 .build();
-
-        return new ResponseEntity<>(
-                MessageResponse.builder()
-                        .message("")
-                        .data(userDto)
-                        .build(), HttpStatus.OK);
-    }
-
-    @GetMapping("user")
-    public Page<User> getAllUsers(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "5") int size,
-            @RequestParam(defaultValue = "id") String sortBy,
-            @RequestParam(defaultValue = "true") boolean ascending
-    ) {
-        Sort sort = ascending ? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
-        Pageable pageable = PageRequest.of(page, size, sort);
-        return userService.findAll(pageable);
     }
 }
