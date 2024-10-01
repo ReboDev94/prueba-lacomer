@@ -70,7 +70,7 @@ public class UserController {
 
     @PutMapping("user/{id}")
     @ResponseStatus(HttpStatus.CREATED)
-    public ResponseEntity<?> update(@RequestBody UserDto userDto, @PathVariable Integer id) {
+    public ResponseEntity<?> update(@Valid @RequestBody UserDto userDto, @PathVariable Integer id) {
         Address address = addressService.getAddressByCp(userDto.getCp());
         User userUpdate = null;
         try {
