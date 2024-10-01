@@ -26,6 +26,16 @@ public class User implements Serializable {
     private String lastSecondName;
     @Column(name = "email")
     private String email;
+    @Column(name = "cp")
+    private String cp;
+    @Column(name = "settement_type")
+    private String settementType;
+    @Column(name = "municipality")
+    private String municipality;
+    @Column(name = "state")
+    private String state;
+    @Column(name = "city")
+    private String city;
 
 
 }

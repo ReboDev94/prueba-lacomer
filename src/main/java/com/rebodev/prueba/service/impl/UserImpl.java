@@ -25,6 +25,11 @@ public class UserImpl implements IUserService {
                 .lastFirstName(userDto.getLastFirstName())
                 .lastSecondName(userDto.getLastSecondName())
                 .email(userDto.getEmail())
+                .cp(userDto.getCp())
+                .settementType(userDto.getSettementType())
+                .municipality(userDto.getMunicipality())
+                .state(userDto.getState())
+                .city(userDto.getCity())
                 .build();
 
         return userDao.save(user);

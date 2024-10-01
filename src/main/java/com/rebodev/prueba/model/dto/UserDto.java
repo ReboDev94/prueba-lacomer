@@ -12,4 +12,9 @@ public class UserDto implements Serializable {
     private String lastFirstName;
     private String lastSecondName;
     private String email;
+    private String cp;
+    private String settementType;
+    private String municipality;
+    private String state;
+    private String city;
 }
